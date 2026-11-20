@@ -6,7 +6,7 @@ import gi
 
 gi.require_version("Gimp", "3.0")
 
-from gi.repository import GObject, Gimp, Gio
+from gi.repository import Gimp, Gio, GObject
 
 scripts_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(scripts_dir)
