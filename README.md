@@ -3,8 +3,7 @@
 Python scripts that paint raster images in GIMP 3 through its
 `gi.repository.Gimp` API, and a shell script that exports them with GIMP
 to PNG, JPEG, Photoshop, icons, brushes and about forty other formats.
-Each image is a self-contained project in `scripts/` with AI-generated
-code.
+Each image is a self-contained project in `scripts/`.
 
 ## Requirements
 
