@@ -248,7 +248,7 @@ class Checks:
 
     def check_gih(self, path, size, layers):
         head = path.read_bytes()[:400].decode("latin-1")
-        self.t.assertIn("cellwidth:%d cellheight:%d" % size, head)
+        self.t.assertIn(f"cellwidth:{size[0]} cellheight:{size[1]}", head)
 
     def check_cur(self, path, size, layers):
         reserved, kind, count, width, height = struct.unpack("<HHHBB", path.read_bytes()[:8])
@@ -284,8 +284,8 @@ class Checks:
 
     def check_h(self, path, size, layers):
         text = path.read_text()
-        self.t.assertIn("static unsigned int width = %d;" % size[0], text)
-        self.t.assertIn("static unsigned int height = %d;" % size[1], text)
+        self.t.assertIn(f"static unsigned int width = {size[0]};", text)
+        self.t.assertIn(f"static unsigned int height = {size[1]};", text)
         self.t.assertIn("#define HEADER_PIXEL", text)
 
     def check_html(self, path, size, layers):

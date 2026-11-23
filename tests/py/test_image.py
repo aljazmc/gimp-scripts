@@ -57,8 +57,7 @@ class ImageTest(unittest.TestCase):
         cls.images = {project: gimp.probe(project, PROBE) for project in gimp.projects()}
 
     def each(self):
-        for project, image in self.images.items():
-            yield project, image
+        yield from self.images.items()
 
     def test_rgb_at_8_bits(self):
         # what the 8-bit formats (png, jpg, gif, ico...) expect, without dithering

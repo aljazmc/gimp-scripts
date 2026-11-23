@@ -72,7 +72,7 @@ def probe(project, code, tmp=None, scripts=SCRIPTS, timeout=1800):
             [GIMP, "-i", "-d", "-f", "-s", "-n", "-c",
              "--batch-interpreter=python-fu-eval", "-b", "-", "--quit"],
             input=PRELUDE + "\n" + code, capture_output=True, text=True,
-            timeout=timeout, cwd=ROOT,
+            timeout=timeout, cwd=ROOT, check=False,
             env={**os.environ, "PROJECT": project, "PROBE_TMP": str(tmp),
                  "PROBE_SCRIPTS": str(scripts), "PYTHONDONTWRITEBYTECODE": "1"},
         )

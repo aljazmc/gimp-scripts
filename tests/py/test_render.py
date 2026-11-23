@@ -84,8 +84,7 @@ class RenderTest(unittest.TestCase):
         shutil.rmtree(cls.tmp, ignore_errors=True)
 
     def each(self):
-        for project, render in self.renders.items():
-            yield project, render
+        yield from self.renders.items()
 
     def test_covers_the_canvas(self):
         for project, render in self.each():
@@ -114,14 +113,13 @@ class RenderTest(unittest.TestCase):
 
     def test_paints_the_same_picture_every_time(self):
         for project, render in self.each():
-            with self.subTest(project=project):
-                with tempfile.TemporaryDirectory() as tmp:
-                    again = load(gimp.probe(project, PROBE.split("for layer")[0] + "emit(result)\n",
-                                            tmp=tmp)["full"])
-                    histogram = difference(render["image"], again).histogram()
-                    largest = max(level for level, count in enumerate(histogram) if count)
-                    self.assertLessEqual(largest, RERUN_MAX,
-                                         f"a second run painted another picture (off by {largest})")
+            with self.subTest(project=project), tempfile.TemporaryDirectory() as tmp:
+                again = load(gimp.probe(project, PROBE.split("for layer")[0] + "emit(result)\n",
+                                        tmp=tmp)["full"])
+                histogram = difference(render["image"], again).histogram()
+                largest = max(level for level, count in enumerate(histogram) if count)
+                self.assertLessEqual(largest, RERUN_MAX,
+                                     f"a second run painted another picture (off by {largest})")
 
     def test_the_gallery_is_up_to_date(self):
         for project, render in self.each():
