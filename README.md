@@ -83,7 +83,8 @@ prints the usage with every format and the first ten projects.
   exporters don't turn layers into pages, frames or icons.
 - `xcf`, `psd` and `ora` keep the layers, to open and edit the image later.
 - Icons, cursors, brushes and patterns (`ani cur gbr gih icns ico pat xmc`)
-  are cropped to a centered square and scaled to 256×256.
+  are cropped to a centered square and scaled to 256×256, `icns` to
+  1024×1024, the largest macOS icon.
 - Some formats are scaled down to a sensible size: `fli` to 1024×576, `h`
   (a C header) to 256×144, `html` (colored characters) to 192×108 and `txt`
   (ASCII art) to 160×90, which makes 80×45 characters.
@@ -142,24 +143,64 @@ are ready.
 ## Tests
 
 ```sh
-bash tests/test_project.sh             # project.sh
-python3 -m unittest discover tests     # the Python scripts
+for test in tests/sh/test_*.sh; do bash "$test"; done   # project.sh
+python3 -m unittest discover tests/py                   # the scripts and the images
 ```
 
-The tests need only bash and Python's standard library, and none of them
-runs the application or writes outputs.
+The tests are split by language: `tests/sh/` tests `project.sh` with bash,
+`tests/py/` tests the Python scripts and the images they paint. None of them
+writes outputs into the repository.
 
-- `tests/test_project.sh` checks that `project.sh` rejects bad arguments
+The tests of `project.sh` run it in a temporary sandbox, with a few fake
+projects and export scripts and a stand-in for `gimp-console-3.0` (see
+`tests/sh/lib.sh`), so they paint nothing and never touch `build/` or
+`xcf/`:
+
+- `tests/sh/test_project.sh` checks that `project.sh` rejects bad arguments
   with its usage and exit code 1.
-- `tests/test_common.py` checks that `square()` crops the center of an
-  image and scales it, with a stand-in for `Gimp.Image`. It needs GIMP's
-  Python bindings (`gi` with Gimp 3.0), but not a running GIMP.
+- `tests/sh/test_formats.sh` checks that the formats of `project.sh`, the
+  exporters in `scripts/` and this README agree: every format has an
+  exporter that writes its own file, every exporter is listed, the Formats
+  table names every format, the count of formats is right, and only `xcf`,
+  `psd` and `ora` keep the layers.
+- `tests/sh/test_outputs.sh` checks the names of the outputs, as described
+  under Usage, through the `clean` commands.
+- `tests/sh/test_run.sh` checks that `project.sh` runs the console GIMP
+  with the batch options, the export script on stdin, the project in
+  `PROJECT` and `scripts/` on the `PYTHONPATH`, for one project and for
+  `all`, from any directory; that it skips existing outputs, reports a
+  failed export with exit code 1 and stops when GIMP is missing.
+
+The Python tests run on plain Python. `tests/py/test_common.py` needs GIMP's
+Python bindings; the others run their probes inside `gimp-console-3.0`, as
+`project.sh` runs an export script, check the results with Pillow, and are
+skipped without them (see `tests/py/gimp.py`):
+
+- `tests/py/test_common.py` checks that `square()` crops the center of an
+  image and scales it, with a stand-in for `Gimp.Image`.
+- `tests/py/test_image.py` inspects the image before it is flattened: RGB at
+  8 bits a channel, and layers with names of their own (not GIMP's
+  defaults), visible, not see-through, on the canvas and not empty.
+- `tests/py/test_render.py` flattens the image at a quarter of its size and
+  checks the pixels: the canvas covered, neither black nor washed out, with
+  contrast; that hiding any layer visibly changes the picture; that a
+  second run paints the same picture, apart from the one level of random
+  dithering GIMP adds to gradients; and that the picture in `gallery/`
+  still matches the project.
+- `tests/py/test_exports.py` runs every export script in one GIMP session on
+  a temporary copy of `scripts/` and checks each file by what is inside it:
+  the format's signature and the size this README promises (the full image,
+  icons cropped to a square, `fli`, `h`, `html` and `txt` scaled down), the
+  layers of `psd`, `ora` and `xcf` by name, and the rows and characters of
+  the `html` and `txt` pictures. Every format needs a check of its own, so a
+  new format can't go untested. It takes about a minute and a half a
+  project.
 
 Lint the code with [ShellCheck](https://www.shellcheck.net/) and
 [Ruff](https://docs.astral.sh/ruff/):
 
 ```sh
-shellcheck project.sh tests/*.sh
+shellcheck project.sh tests/sh/*.sh
 ruff check .
 ```
 

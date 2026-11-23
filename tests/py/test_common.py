@@ -1,12 +1,12 @@
 """Tests for scripts/common.py. It imports GIMP's introspection bindings
 (gi with Gimp 3.0), which work without a running GIMP; the test uses a
-stand-in image. Run: python3 -m unittest discover tests"""
+stand-in image. Run: python3 -m unittest discover tests/py"""
 import importlib
 import sys
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 common = importlib.import_module("common")
 
 
