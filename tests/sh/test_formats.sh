@@ -40,7 +40,7 @@ done
 
 check "scripts/savexcf.py saves the layered XCF into xcf/" \
     grep -qF 'load_project("xcf", flatten=False)' scripts/savexcf.py
-check "the README lists xcf" grep -qE '^\|.*`xcf`' README.md
+check "the README lists xcf" grep -qE "^\|.*\`xcf\`" README.md
 
 # the README says xcf, psd and ora keep the layers: exactly those don't flatten
 layered=$(grep -l 'flatten=False' scripts/export*.py scripts/savexcf.py \
